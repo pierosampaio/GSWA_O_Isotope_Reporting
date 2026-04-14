@@ -1,0 +1,3 @@
+# Add spots accordinf to the example formatting below.
+# Spots added here will not be taken into consideration in sample-level calculations
+# The spot name is the oxygen analysis ID e.g. O-GSWA-G22-16-251159@36-1
