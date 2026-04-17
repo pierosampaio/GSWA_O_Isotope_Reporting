@@ -285,6 +285,7 @@ def Oxygen_processing(path,file):
 def O_file_join(path):
 
     O_dfs = []
+    print("Found Oxygen files:\n")
     for f in os.listdir(path):
         print(f)
         O_dfs.append(
@@ -294,6 +295,38 @@ def O_file_join(path):
         )
     assert len(O_dfs) > 0, "No files to concatenate"
     return pd.concat(O_dfs)
+
+
+def merged_dataset(UPb_dataset, O_dataset, joining_key):
+
+    UPb_dataset[joining_key] = UPb_dataset[joining_key].astype("str")
+    O_dataset[joining_key] = O_dataset[joining_key].astype("str")
+
+    UPb_samples = {s for s in UPb_dataset["Sample"].unique()}
+    O_samples = {s for s in O_dataset["Sample"].unique() if s[0].isnumeric()} # Only append GSWA sample codes
+
+    Problem = UPb_samples.difference(O_samples).union(O_samples.difference(UPb_samples))
+
+    UPb_problem = Problem.intersection(UPb_samples)
+    O_problem = Problem.intersection(O_samples)
+
+    df_merged = pd.merge(
+        O_dataset,UPb_dataset,on=joining_key,how="left"
+    )
+
+    if len(UPb_problem) > 0:
+        print("\nSamples with U-Pb but no Oxygen data:")
+        print("\n".join(UPb_problem))
+    
+    elif len(O_problem) > 0:
+        print("\nSamples with Oxygen data but no U-Pb:")
+        print("\n".join(O_problem))
+
+    else:
+        print("All samples matched!")
+    
+    return df_merged
+
 
 
 def calculate_mswd(vals, errs, w_mean):

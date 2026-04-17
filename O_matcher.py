@@ -42,16 +42,11 @@ def main():
     UPb_path = path_checker("U-Pb files directory: ")  # path to the U-Pb tables
     O_path = path_checker("Oxygen files directory: ")  # path to the oxygen analyses tables
 
-    UPb_files = os.listdir(UPb_path)
-
     UPb = UPb_file_join(UPb_path)
     O_dfs = O_file_join(O_path)
 
-
-    df_merged = pd.merge(
-        O_dfs,UPb,on="SampleSpot",how="left"
-    )
-
+    df_merged = merge_datasets(UPb,O_dfs,"SampleSpot")
+    
     df_merged["UPB_ANALYSIS_ID"] = df_merged["UPB_ANALYSIS_ID"].astype("string")
 
     df_merged = df_merged.drop(["Sample_y"], axis = 1)
