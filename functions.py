@@ -302,7 +302,8 @@ def merge_dataset(UPb_dataset, O_dataset, joining_key):
     UPb_dataset[joining_key] = UPb_dataset[joining_key].astype("str")
     O_dataset[joining_key] = O_dataset[joining_key].astype("str")
 
-    UPb_samples = {s for s in UPb_dataset["Sample"].unique()}
+    UPb_samples = {m.group() for s in UPb_dataset["Sample"].unique() if \
+                   (m := re.search(r"\d{6}", s))}
     O_samples = {s for s in O_dataset["Sample"].unique() if s[0].isnumeric()} # Only append GSWA sample codes
 
     Problem = UPb_samples.difference(O_samples).union(O_samples.difference(UPb_samples))
