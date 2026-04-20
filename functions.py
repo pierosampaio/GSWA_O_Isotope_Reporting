@@ -327,8 +327,6 @@ def merged_dataset(UPb_dataset, O_dataset, joining_key):
     
     return df_merged
 
-
-
 def calculate_mswd(vals, errs, w_mean):
     n = len(vals)
     if n <=1: return 0

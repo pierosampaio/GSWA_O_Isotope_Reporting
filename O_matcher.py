@@ -45,7 +45,11 @@ def main():
     UPb = UPb_file_join(UPb_path)
     O_dfs = O_file_join(O_path)
 
-    df_merged = merge_datasets(UPb,O_dfs,"SampleSpot")
+    df_merged = merge_datasets(
+        UPb,
+        O_dfs,
+        "SampleSpot"
+    )
     
     df_merged["UPB_ANALYSIS_ID"] = df_merged["UPB_ANALYSIS_ID"].astype("string")
 
