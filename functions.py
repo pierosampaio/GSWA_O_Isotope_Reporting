@@ -297,7 +297,7 @@ def O_file_join(path):
     return pd.concat(O_dfs)
 
 
-def merged_dataset(UPb_dataset, O_dataset, joining_key):
+def merge_dataset(UPb_dataset, O_dataset, joining_key):
 
     UPb_dataset[joining_key] = UPb_dataset[joining_key].astype("str")
     O_dataset[joining_key] = O_dataset[joining_key].astype("str")
