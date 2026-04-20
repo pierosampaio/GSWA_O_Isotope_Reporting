@@ -45,7 +45,7 @@ def main():
     UPb = UPb_file_join(UPb_path)
     O_dfs = O_file_join(O_path)
 
-    df_merged = merge_datasets(
+    df_merged = merge_dataset(
         UPb,
         O_dfs,
         "SampleSpot"
