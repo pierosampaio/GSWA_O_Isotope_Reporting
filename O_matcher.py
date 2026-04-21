@@ -11,6 +11,8 @@ script_path = r"C:\workplace\PythonScripts\O_Matcher"
 if script_path not in sys.path:
     sys.path.append(script_path)
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "vendor"))
+
 from functions import *
 
 from scipy.optimize import brentq
