@@ -303,7 +303,7 @@ def merge_dataset(UPb_dataset, O_dataset, joining_key):
     O_dataset[joining_key] = O_dataset[joining_key].astype("str")
 
     UPb_samples = {m.group() for s in UPb_dataset["Sample"].unique() if \
-                   (m := re.search(r"\d{6}", s))}
+                   (m := re.search(r"\d{6}", s))} # Only extract GSWA 6-digit code 
     O_samples = {s for s in O_dataset["Sample"].unique() if s[0].isnumeric()} # Only append GSWA sample codes
 
     Problem = UPb_samples.difference(O_samples).union(O_samples.difference(UPb_samples))
@@ -420,45 +420,49 @@ def calc_group_stats(df: pd.DataFrame, grouping_var: str, variable: str, variabl
     variable, which should be the name of the column of interest and its associated uncertainty
     (variable_unc)
     """
+    try:
+        df[variable] = df[variable].astype(float)
+        df[variable_unc] = df[variable_unc].astype(float)
+        dfg = df.groupby(grouping_var)
+        
+        median = dfg[variable].median().round(2)
+        median_1sigma = ((dfg[variable_unc].median()**2 + dfg[variable].std()**2).values)**0.5 # Following Yong Jun's method
+        average = dfg[variable].mean().round(2)
+        std = dfg[variable].std().round(2)
+        maxx = dfg[variable].max()
+        min = dfg[variable].min()
 
-    
-    
-    dfg = df.groupby(grouping_var)
-    
-    median = dfg[variable].median().round(2)
-    median_1sigma = ((dfg[variable_unc].median()**2 + dfg[variable].std()**2).values)**0.5 # Following Yong Jun's method
-    average = dfg[variable].mean().round(2)
-    std = dfg[variable].std().round(2)
-    maxx = dfg[variable].max()
-    min = dfg[variable].min()
+        sample_weighted_mean = (
+                dfg
+                .apply(lambda g: weighted_mean(
+                    g[variable],
+                    g[variable_unc]
+                )
+            ))
+        
+        sample_weighted_mean = pd.DataFrame.from_dict(sample_weighted_mean.to_dict(), orient="index")
+        wm = sample_weighted_mean["mean"].round(2)
+        uncertainty = sample_weighted_mean["uncertainty"].round(2)
+        mswd = sample_weighted_mean["mswd"].round(2)
+        n = sample_weighted_mean["n"]
+        ci = np.full(len(dfg),"95%")
 
-    sample_weighted_mean = (
-            dfg
-            .apply(lambda g: weighted_mean(
-                g[variable],
-                g[variable_unc]
-            )
+        data = np.array((
+            median,median_1sigma,average,std,wm,uncertainty,n,mswd,ci
         ))
+
+        headers = [
+            "MDN","1SIG","AVE","1SD","WM","UNCER","PRIMARY_N","MSWD","CONF"
+        ]
+        
+        index = sample_weighted_mean.index
+        columns = [prepend + "_" + lab for lab in headers]
+
+        return pd.DataFrame(data=data.T,columns=columns,index=index)
     
-    sample_weighted_mean = pd.DataFrame.from_dict(sample_weighted_mean.to_dict(), orient="index")
-    wm = sample_weighted_mean["mean"].round(2)
-    uncertainty = sample_weighted_mean["uncertainty"].round(2)
-    mswd = sample_weighted_mean["mswd"].round(2)
-    n = sample_weighted_mean["n"]
-    ci = np.full(len(dfg),"95%")
-
-    data = np.array((
-        median,median_1sigma,average,std,wm,uncertainty,n,mswd,ci
-    ))
-
-    headers = [
-        "MDN","1SIG","AVE","1SD","WM","UNCER","PRIMARY_N","MSWD","CONF"
-    ]
-    
-    index = sample_weighted_mean.index
-    columns = [prepend + "_" + lab for lab in headers]
-
-    return pd.DataFrame(data=data.T,columns=columns,index=index)
+    except TypeError:
+        print("The data type is non-numeric and cannot be processed.")
+        return None
 
 
 def create_aggregate_df(df: pd.DataFrame, grouping_var: str, vals: list, uncertainties: list, prepends: list, by_list = None) -> pd.DataFrame:
