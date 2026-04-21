@@ -86,6 +86,18 @@ def UPb_xls_process(UPb_path,UPb_file):
     
     ## Sanitise dataframe
     df = df.iloc[:,:20]
+
+    df = df.rename({
+     "Grain Spot":"UPB_ANALYSIS_ID",
+     "GrainSpot":"UPB_ANALYSIS_ID",
+     "Grain spot":"UPB_ANALYSIS_ID",
+     "grain spot":"UPB_ANALYSIS_ID",
+     "Grp no":"Grp_ID",
+     "Grp_no":"Grp_ID",
+     "Grp ID":"Grp_ID"
+     },
+     axis = 1)
+
     df = df.dropna(axis=0)
     
     
